@@ -1,5 +1,6 @@
 # python==3.11.8 
 beautifulsoup4==4.12.2
+requests==2.31.0
 numpy==1.26.4
 pandas==2.1.1 
 selenium==4.9.0     
