@@ -34,6 +34,36 @@ def get_driver_source(url):
 
     return page_source
 
+# %%
+def remake_html_source(page_source):
+    # BeautifulSoup을 사용하여 HTML 파싱
+    try:
+        soup = BeautifulSoup(page_source, "html.parser")
+    except:
+        raise ValueError()
+
+    # 지정된 CSS 선택자에 해당하는 내용 추출
+    content = soup.select(
+        "body > div.wrapper > div.container.content > div.row > div:nth-child(n+4):nth-child(-n+5)"
+    )
+
+    # 문제 제목 추출
+    problem_title = soup.select_one("#problem_title").text.strip()
+
+    # 문제 페이지 URL 추출
+    problem_url = soup.select_one(
+        "body > div.wrapper > div.container.content > div.row > div:nth-child(2) > ul > li.active > a"
+    )["href"]
+    number = problem_url.split("/")[-1]
+
+    # h1 태그와 a 태그를 사용하여 하이퍼링크 생성
+    html_code = f"<h1><a href='https://www.acmicpc.net{problem_url}'>{number}번 : {problem_title}</a></h1>"
+
+    # 추출한 내용을 문자열로 변환하여 반환
+    if content:
+        return html_code + "\n".join(str(tag) for tag in content)
+    else:
+        return None
 
 # %%
 def replace_str(text):
