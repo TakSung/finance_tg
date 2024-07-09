@@ -18,7 +18,7 @@ service = Service(ChromeDriverManager().install())
 
 
 # %%
-# 스크롤 함수 정의의
+# 스크롤 함수 정의
 def scroll(drive, page_limit):
     try:
         # `allow pasting` 크롬 개발도구에서 붙여넣기하기(보안적인 문제가 있어서 안하는게 좋긴함)
@@ -51,27 +51,25 @@ def scroll(drive, page_limit):
                 "return document.documentElement.scrollHeight"
             )
 
-            if new_page_height == last_page_height:  # 더 이상 없을 때
+            if last_page_height == new_page_height:  # 더 이상 없을 때
                 print("scroll finish!!!!")
                 break
             else:
                 last_page_height = new_page_height  # 더 있을 때
 
-            if cnt > page_limit:  # 페이지 넘어갔는지 확인
+            if page_limit < cnt:  # 페이지 넘어갔는지 확인
                 break
             cnt += 1
     except:
         print("Error ")
 
-# %%
-### input
-# search_word = "페이커"
-search_word = input("검색할 단어를 알려주세요!")
-page_limit = 4
 
 # %%
 ### main
 # def main(search_word):
+search_word = "페이커"
+page_limit = 1
+
 y_url = "https://www.youtube.com/results?search_query={}"
 
 drive = webdriver.Chrome(options=chrome_options, service=service)
@@ -93,29 +91,39 @@ soup = bs(html_source, "html.parser")
 # %%
 # 키워드 찾기
 if search_word == "":
-    c_list = soup.find_all(class_="style-scope ytd-rich-grid-media")
+    c_list = soup.find_all(class_="")  # class_ 뒤에 값 채우기
 else:
-    c_list = soup.find_all(class_="yt-simple-endpoint style-scope ytd-video-renderer")
+    c_list = soup.find_all(
+        class_="yt-simple-endpoint style-scope ytd-grid-video-renderer"
+    )  # class_ 뒤에 값 채우기
 
 # %%
 # 원하는 요소 추출
 y_link_list = []
 
 for c in c_list:
+    # title에 있는 '\n' 없애기
     y_link_list.append(
-        {"url": "https://www.youtube.com/" + c.get("href"), "title": c.text.strip()}
+        {"url": "https://www.youtube.com/" + c.get("href"), "title": c.text}
     )
 
 # %%
 # 저장
 import json
 
-with open("youtube.json", "w", encoding="UTF-8") as f:
-    json.dump(y_link_list, f, ensure_ascii=False)
+# 한글 인코딩의 차이 느껴보기
+with open("youtube.json", "w") as f:
+    json.dump(y_link_list, f)
+
+# 인코딩 후
+# with open("youtube.json", "w", encoding="UTF-8") as f:
+#     json.dump(y_link_list, f, ensure_ascii=False)
 print("완료!!!!")
 
 
 # %%
+# 단독 실행했을때 잘 되도록 만들기
+
 # if __name__ == "__main__":
 #     search_word = input("검색할 단어를 알려주세요!")
 #     main(search_word)
